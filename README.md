@@ -25,6 +25,8 @@ pyinstaller --onefile --clean --name=chatgpt-server-python main.py
 docker build --platform linux/amd64  -t registry.cn-shanghai.aliyuncs.com/xxim-dev/chatgpt-server-python:202303031900 .
 ```
 
+### 3. 运行容器
+
 ```bash
 docker run --name chatgpt-server-python \
 -d -p 50051:50051 \
