@@ -5,6 +5,7 @@ import openai
 
 from tool.tiktoken import get_token_info
 
+
 class RoleEnum(Enum):
     System = "system"
     Assistant = "assistant"
@@ -37,6 +38,7 @@ class RoleEnum(Enum):
             return 1
         elif role == RoleEnum.User:
             return 2
+
 
 class ChatGptMessage:
     def __init__(self, text: str, role: RoleEnum):
@@ -81,22 +83,37 @@ class ChatGpt:
         self._messages.append(ChatGptMessage(text, RoleEnum.User))
 
     def _get_messages(self) -> List[dict]:
-        # 遍历所有的消息，如果消息总长度超过了 max_input_length，先尝试删除前面的message，如果只剩下最后一个message，那么就截断最后一个message
+        # 遍历所有的消息
+        # 如果消息总长度超过了 max_input_length 先尝试删除前面的message(跳过 role=system) 直到总长度小于 max_input_length 或者只剩下最后一个message
         messages = []
         total_length = 0
         for message in self._messages:
-            token_info = get_token_info(message.text, self._max_input_length)
-            if total_length + token_info.length_truncated > self._max_input_length:
-                if len(messages) == 0:
-                    messages.append(
-                        ChatGptMessage(token_info.text_truncated, message.role).dict()
-                    )
-                    break
-                else:
-                    break
-            else:
-                messages.append(message.dict())
-                total_length += token_info.length_truncated
+            token_info = get_token_info(message.text)
+            total_length += token_info.length
+        system_message = None
+        while total_length > self._max_input_length:
+            if len(self._messages) == 1:
+                break
+            if len(self._messages) == 0:
+                return []
+            message = self._messages.pop(0)
+            if message.role == RoleEnum.System:
+                # 塞回去
+                system_message = message
+                continue
+            token_info = get_token_info(message.text)
+            total_length -= token_info.length
+
+        # 如果此时还是超过了 max_input_length 则截断最后一个message
+        if total_length > self._max_input_length:
+            message = self._messages.pop()
+            token_info = get_token_info(message.text)
+            message._text = token_info.text_truncated
+            self._messages.append(message)
+        if system_message:
+            self._messages.insert(0, system_message)
+        for message in self._messages:
+            messages.append(message.dict())
         return messages
 
     def request(self):
