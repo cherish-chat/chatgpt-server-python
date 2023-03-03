@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "./pb";
+
+enum RoleEnum {
+  System = 0;
+  Assistant = 1;
+  User = 2;
+}
+
+message ChatGptMessage {
+  string text = 1;
+  RoleEnum role = 2;
+}
+
+message AnswerReq {
+  repeated ChatGptMessage messages = 1;
+  int32 maxTokens = 2;
+}
+
+
+message AnswerResp {
+  message Choice {
+    ChatGptMessage message = 1;
+    string finishReason = 2;
+    int64 index = 3;
+  }
+  repeated Choice choices = 1;
+  string errorInfo = 2;
+}
+
+service ChatGptService {
+  rpc Answer(AnswerReq) returns (AnswerResp) {}
+}
