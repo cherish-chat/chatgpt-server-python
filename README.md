@@ -16,7 +16,6 @@ export GRPC_SERVER_PORT=50051 # default=50051
 ```bash
 pip freeze > requirements.txt
 tar -czvf chatgpt-server-python.tar.gz requirements.txt main.py pb/* server/* tool/*
-pyinstaller --onefile --clean --name=chatgpt-server-python main.py
 ```
 
 ### 2. 构建镜像
