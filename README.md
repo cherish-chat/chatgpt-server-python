@@ -14,6 +14,7 @@ export GRPC_SERVER_PORT=50051 # default=50051
 ### 1. 编译二进制
 
 ```bash
+rm -rf requirements.txt chatgpt-server-python.tar.gz
 pip freeze > requirements.txt
 tar -czvf chatgpt-server-python.tar.gz requirements.txt main.py pb/* server/* tool/*
 ```
@@ -21,7 +22,7 @@ tar -czvf chatgpt-server-python.tar.gz requirements.txt main.py pb/* server/* to
 ### 2. 构建镜像
 
 ```bash
-docker build --platform linux/amd64  -t registry.cn-shanghai.aliyuncs.com/xxim-dev/chatgpt-server-python:202303031900 .
+docker build --platform linux/amd64  -t registry.cn-shanghai.aliyuncs.com/xxim-dev/chatgpt-server-python:202303071601 .
 ```
 
 ### 3. 运行容器

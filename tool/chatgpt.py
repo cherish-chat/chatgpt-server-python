@@ -107,13 +107,19 @@ class ChatGpt:
         # 如果此时还是超过了 max_input_length 则截断最后一个message
         if total_length > self._max_input_length:
             message = self._messages.pop()
-            token_info = get_token_info(message.text)
-            message._text = token_info.text_truncated
+            token_info = get_token_info(message.text, self._max_input_length)
+            if token_info.text_truncated == "":
+                message._text = token_info.text
+            else:
+                message._text = token_info.text_truncated
             self._messages.append(message)
         if system_message:
             self._messages.insert(0, system_message)
         for message in self._messages:
             messages.append(message.dict())
+        # 如果倒数第二个是user 则删除他 直到倒数第二个不是user
+        while len(messages) > 1 and messages[-2]["role"] == "user":
+            messages.pop(-2)
         return messages
 
     def request(self):
